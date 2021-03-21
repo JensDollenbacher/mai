@@ -11,7 +11,6 @@ import time
 import logging
 import json
 import platform
-
 import requests
 
 # ---------- functions ----------
@@ -27,7 +26,7 @@ def getDataFromLMS(req):
 
 logging.basicConfig(level=logging.INFO)
 
-
+# basic configuration
 host = '192.168.2.10'
 port = 9090
 web_port = 9000
@@ -35,13 +34,17 @@ file_loc = ''
 lms_url = "http://" + host + ":" + str(web_port) + "/jsonrpc.js"
 player = "00:04:20:23:20:b2"
 
+# Dev on Mac, but runs later on openhabian Raspberry
 my_env = platform.system()
 
 if my_env == 'Darwin':
+    # write HTML files in local directory
     file_loc = './'
 else:
+    # write HTML files in OpenHab static content directory
     file_loc = '/etc/openhab/html/'
 
+# Get Artists from LMS
 logging.debug("------------- current artist ------------------")
 
 json_req = { 
@@ -49,7 +52,6 @@ json_req = {
     "params":
     [
         player,
-        
         [
             "artist",
             "?"
@@ -62,14 +64,14 @@ cur_artist = json_artist["result"]["_artist"]
 
 logging.debug("Current artist: [" + cur_artist + "]")
 
+# Get Title from LMS
 logging.debug("------------- current title ------------------")
 
 json_req = { 
     "method": "slim.request",
     "params":
     [
-        player,
-        
+        player,       
         [
             "title",
             "?"
@@ -83,8 +85,10 @@ cur_title = json_title["result"]["_title"]
 
 logging.debug("Current title: [" + cur_title + "]")
 
+# Get Lyrics from LMS
 logging.debug("------------- lyrics ------------------")
 
+# used for debugging - invalid artist and title
 # cur_artist = "Heinz"
 # cur_title = "Becker"
 
@@ -92,8 +96,7 @@ json_req = {
     "method": "slim.request",
     "params":
     [
-        player,
-        
+        player,       
         [
             "musicartistinfo",
             "lyrics",
@@ -110,7 +113,7 @@ lyrics_avail = "1"
 if "error" in json_lyrics["result"]:
     lyrics_avail = "0"
 
-
+# Build HTML page to display in HabPanel
 if lyrics_avail == "0":
     lyrics = "<html><p style=\"color:white;\"><font face=\"Helvetica\">No lyrics available</font></p></html>"
 else:
@@ -122,14 +125,14 @@ f= open(file_loc + "lyrics.html","w+")
 f.write(lyrics)
 f.close() 
 
+# Get Photos from LMS
 logging.debug("------------- Artist Photos ------------------")
 
 json_req = { 
     "method": "slim.request",
     "params":
     [
-        player,
-        
+        player,       
         [
             "musicartistinfo",
             "artistphotos",
@@ -140,14 +143,14 @@ json_req = {
 
 json_photos = getDataFromLMS(json_req)
 
+# Get Biography from LMS
 logging.debug("------------- Artist Bio ------------------")
 
 json_req = { 
     "method": "slim.request",
     "params":
     [
-        player,
-        
+        player,       
         [
             "musicartistinfo",
             "biography",
@@ -163,7 +166,7 @@ bio_avail = "1"
 if "error" in json_bio["result"]:
     bio_avail = "0"
 
-
+# Build HTML page to display in HabPanel
 if bio_avail == "0":
     #bio = "<html><p style=\"color:white;\"><font face=\"Helvetica\">No biography available</font></p></html>"
     #bio = "<html><p style=\"color:white;\"><font face=\"Helvetica\">" + str(myTry) + " --- No biography available</font></p></html>"
@@ -179,12 +182,16 @@ f= open(file_loc + "biography.html","w+")
 f.write(bio)
 f.close() 
 
-# json build
+# Build Json doc for OpenHab
 pic_count = 0
 
-output_json = {"songinfo": {"lyrics": "0","photos": [], "pic_count": 0}}
+output_json = {"songinfo": {"artist":"","title":"","lyrics": "0","biography": "0","photos": [], "pic_count": 0}}
+output_json["songinfo"]["artist"] = cur_artist
+output_json["songinfo"]["title"] = cur_title
 output_json["songinfo"]["lyrics"] = lyrics_avail
+output_json["songinfo"]["biography"] = bio_avail
 
+# loop over list of artist photos
 for picture in json_photos["result"]["item_loop"]:
     output_json["songinfo"]["photos"].append(picture["url"])
     pic_count = pic_count + 1
