@@ -9,6 +9,7 @@ import sys
 import os 
 import time
 import logging
+import json
 
 import requests
 
@@ -51,6 +52,8 @@ logging.basicConfig(level=logging.INFO)
 host = '192.168.2.10'
 port = 9090
 file_loc = ''
+
+# output_json["songinfo"]["lyrics"] = "Hallo"
 
 my_env = 'Mac'
 #my_env = 'Raspi'
@@ -279,19 +282,26 @@ s.close()
 
 # json build
 pic_count = 0
-jsondoc = "{\"songinfo\" : { \"lyrics\":\"" + lyricsavail + "\","
-jsondoc = jsondoc + "\"photos\":["
-logging.debug("jsondoc = " + jsondoc )
+#jsondoc = "{\"songinfo\" : { \"lyrics\":\"" + lyricsavail + "\","
+#jsondoc = jsondoc + "\"photos\":["
+#logging.debug("jsondoc = " + jsondoc )
 
+#for picture in myUrlList:
+#    jsondoc = jsondoc + "{\"url\":\"" + picture + "\"},"
+#    pic_count = pic_count + 1
+
+#if pic_count > 0:
+#    jsondoc = jsondoc[0:len(jsondoc)-1]
+
+#jsondoc = jsondoc + "], \"pic_count\" : " + str(pic_count) + "} }"
+
+output_json = {"songinfo": {"lyrics": "0","photos": [], "pic_count": 0}}
+output_json["songinfo"]["lyrics"] = lyricsavail
 for picture in myUrlList:
-    jsondoc = jsondoc + "{\"url\":\"" + picture + "\"},"
-    pic_count = pic_count + 1
+    output_json["songinfo"]["photos"].append({"url":picture})
+output_json["songinfo"]["pic_count"] = pic_count
 
-if pic_count > 0:
-    jsondoc = jsondoc[0:len(jsondoc)-1]
-
-jsondoc = jsondoc + "], \"pic_count\" : " + str(pic_count) + "} }"
-
-print(jsondoc)
+#print(jsondoc)
+print(json.dumps(output_json))
 
 
