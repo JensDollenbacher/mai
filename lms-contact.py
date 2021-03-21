@@ -51,8 +51,10 @@ logging.basicConfig(level=logging.INFO)
 host = '192.168.2.10'
 port = 9090
 file_loc = ''
+
 my_env = 'Mac'
 #my_env = 'Raspi'
+
 if my_env == 'Mac':
     file_loc = './'
 else:
