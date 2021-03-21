@@ -14,6 +14,15 @@ import platform
 
 import requests
 
+# ---------- functions ----------
+
+def getDataFromLMS(req):
+    json_resp = requests.post(lms_url, data=json.dumps(req), headers={"Content-Type":"application/json"})
+    if json_resp.status_code != 200:
+        return {"result": {"error":"HTTP Status is " + json_resp.status_code}}
+
+    return json.loads(json_resp.content)
+
 # ---------- main ---------------
 
 logging.basicConfig(level=logging.INFO)
@@ -48,11 +57,7 @@ json_req = {
     ]
 }
 
-json_resp = requests.post(lms_url, data=json.dumps(json_req), headers={"Content-Type":"application/json"})
-if json_resp.status_code != 200:
-    print("Fuck")
-
-json_artist = json.loads(json_resp.content)
+json_artist = getDataFromLMS(json_req)
 cur_artist = json_artist["result"]["_artist"]
 
 logging.debug("Current artist: [" + cur_artist + "]")
@@ -72,12 +77,8 @@ json_req = {
     ]
 }
 
-json_resp = requests.post(lms_url, data=json.dumps(json_req), headers={"Content-Type":"application/json"})
-if json_resp.status_code != 200:
-    print("Fuck")
-
-json_artist = json.loads(json_resp.content)
-cur_title = json_artist["result"]["_title"]
+json_title = getDataFromLMS(json_req)
+cur_title = json_title["result"]["_title"]
 
 
 logging.debug("Current title: [" + cur_title + "]")
@@ -102,14 +103,7 @@ json_req = {
     ]
 }
 
-json_resp = requests.post(lms_url, data=json.dumps(json_req), headers={"Content-Type":"application/json"})
-
-if json_resp.status_code != 200:
-    print("Fuck")
-    # This means something went wrong.
-    #raise ApiError('GET /tasks/ {}'.format(resp.status_code))
-
-json_lyrics = json.loads(json_resp.content)
+json_lyrics = getDataFromLMS(json_req)
 
 lyrics_avail = "1"
 
@@ -144,15 +138,7 @@ json_req = {
     ]
 }
 
-json_resp = requests.post(lms_url, data=json.dumps(json_req), headers={"Content-Type":"application/json"})
-
-if json_resp.status_code != 200:
-    print("Fuck")
-    # This means something went wrong.
-    #raise ApiError('GET /tasks/ {}'.format(resp.status_code))
-
-json_photos = json.loads(json_resp.content)
-
+json_photos = getDataFromLMS(json_req)
 
 logging.debug("------------- Artist Bio ------------------")
 
@@ -170,14 +156,7 @@ json_req = {
     ]
 }
 
-json_resp = requests.post(lms_url, data=json.dumps(json_req), headers={"Content-Type":"application/json"})
-
-if json_resp.status_code != 200:
-    print("Fuck")
-    # This means something went wrong.
-    #raise ApiError('GET /tasks/ {}'.format(resp.status_code))
-
-json_bio = json.loads(json_resp.content)
+json_bio = getDataFromLMS(json_req)
 
 bio_avail = "1"
 
@@ -194,8 +173,6 @@ else:
     bio = bio.replace("\n", "<br/>")
     #bio = "<html><p style=\"color:white;\"><font face=\"Helvetica\">" + bio + "</font></p></html>"
     bio = "<html><p style=\"color:white;\"><font face=\"Helvetica\">" + "<br/>" + bio + "</font></p></html>"
-
-
 
 
 f= open(file_loc + "biography.html","w+")
